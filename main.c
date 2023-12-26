@@ -52,9 +52,17 @@ int main(int argc, char *argv[])
         system("clear");
         printf("Press '.' to close\r\n");
         printf("You pressed '%c'\r\n", c);
-        print_board(b, Points, NowPoints);
-        
-        if (!DropFlag)
+
+        if (DropFlag)
+        {
+            p.x = 0;
+            p.y = 0;
+            p.v = 1;
+            Points[NowPoints] = p;
+            NowPoints++;
+            DropFlag = FALSE;
+        }
+        else
         {
             if (c == 'd' && (p.x < BOARD_SIZE - 1))
             {
@@ -74,18 +82,7 @@ int main(int argc, char *argv[])
             }
         }
 
-        if (DropFlag)
-        {
-            if (c = getchar())
-            {
-                p.x = 0;
-                p.y = 0;
-                p.v = 1;
-                Points[NowPoints] = p;
-                NowPoints++;
-                DropFlag = FALSE;
-            }
-        }
+        print_board(b, Points, NowPoints);
 
         if ((c = getchar()) == '.')
         { // '.' を押すと抜ける
