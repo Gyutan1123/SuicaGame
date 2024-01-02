@@ -1,3 +1,4 @@
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #define BOARD_SIZE 5
@@ -6,6 +7,9 @@
 #define FALSE 0
 #define RIGHT 2
 #define LEFT 3
+
+#define MAX(a, b) (((a) > (b)) ? (a) : (b))
+#define MIN(a, b) (((a) < (b)) ? (a) : (b))
 
 typedef struct point {
     int x;        // x座標
@@ -26,7 +30,7 @@ typedef struct board {
 } Board;
 
 int EvolvePointIndex(Board b, Point *p, Point **Points, int PointNum);
-
+int LimitYtoDrop(Point *p, Point **Points, int PointNum);
 void print_board(Board b, Point **Points, int PointNum) {
     for (int i = 0; i < PointNum; i++) {
         Point *p = Points[i];
@@ -93,7 +97,8 @@ int main(int argc, char *argv[]) {
                     pThis->NowPoint->x--;
                 }
                 if (c == 's') {
-                    pThis->NowPoint->y = BOARD_SIZE - 1;
+                    pThis->NowPoint->y =
+                        LimitYtoDrop(pThis->NowPoint, Points, NowPointNum);
                     pThis->EvolvePointIndex = EvolvePointIndex(
                         b, pThis->NowPoint, Points, NowPointNum);
                     if (pThis->EvolvePointIndex != -1) {
@@ -120,9 +125,9 @@ int main(int argc, char *argv[]) {
                 break;
         }
 
-        printf("Index : %d\r\n", pThis->EvolvePointIndex);
-        printf("step : %d\r\n", pThis->MainStep);
-        printf("PointNum : %d\r\n", NowPointNum);
+        // printf("Index : %d\r\n", pThis->EvolvePointIndex);
+        // printf("step : %d\r\n", pThis->MainStep);
+        // printf("PointNum : %d\r\n", NowPointNum);
 
         print_board(b, Points, NowPointNum);
 
@@ -161,4 +166,17 @@ int EvolvePointIndex(Board b, Point *p, Point **Points, int PointNum) {
     } else {
         return -1;
     }
+}
+
+int LimitYtoDrop(Point *p, Point **Points, int PointNum) {
+    int ret = BOARD_SIZE - 1;
+    Point *q;
+    for (int i = 0; i < PointNum - 1; i++) {
+        q = Points[i];
+        if (!q->Survive || q->x != p->x) {
+            continue;
+        }
+        ret = MIN(ret, q->y - 1);
+    }
+    return ret;
 }
