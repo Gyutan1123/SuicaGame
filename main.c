@@ -133,8 +133,13 @@ int main(int argc, char *argv[]) {
                 break;
             case WaitEvolve:
                 pThis->NowPoint->Survive = FALSE;
+                pThis->NowPoint = Points[pThis->EvolvePointIndex];
                 Points[pThis->EvolvePointIndex]->v++;
-                pThis->MainStep = WaitNextPoint;
+                pThis->EvolvePointIndex = EvolvePointIndex(
+                    b, pThis->NowPoint, Points, NowPointNum);
+                if (pThis->EvolvePointIndex == -1) {
+                    pThis->MainStep = WaitNextPoint;
+                }
                 print_board(b, Points, NowPointNum);
                 break;
             case GameOver:
@@ -189,8 +194,10 @@ int EvolvePointIndex(Board b, Point *p, Point **Points, int PointNum) {
         return retD;
     } else if (retL != -1) {
         return retL;
-    } else {
+    } else if (retR != -1) {
         return retR;
+    } else {
+        return -1;
     }
 }
 
