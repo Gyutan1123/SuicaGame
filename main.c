@@ -43,9 +43,11 @@ void print_board(Board b, Point **Points, int PointNum) {
     }
 }
 
-void reset_Board(Board b) {
+void reset_Board(Board *b) {
     for (int i = 0; i < BOARD_SIZE; i++) {
-        b.field[i][i] = "-";
+        for (int j = 0; j < BOARD_SIZE; j++) {
+            b->field[i][j] = '-';
+        }
     }
 }
 
@@ -53,13 +55,15 @@ enum {
     WaitDrop,
     WaitNextPoint,
     WaitEvolve,
+    GameOver,
 };
 
 int main(int argc, char *argv[]) {
     THIS *pThis = malloc(sizeof(THIS));
 
     pThis->MainStep = WaitDrop;
-    Board b = {.field = {"-----", "-----", "-----", "-----", "-----"}};
+    Board b;
+    reset_Board(&b);
     Point *Points[MAXPOINTNUM];
     for (int i = 0; i < MAXPOINTNUM; i++) {
         Points[i] = (Point *)malloc(sizeof(Point));
@@ -83,7 +87,7 @@ int main(int argc, char *argv[]) {
         "/bin/stty raw onlcr");  // enterを押さなくてもキー入力を受け付けるようになる
     int DropFlag = FALSE;
     while (1) {
-        reset_Board(b);
+        reset_Board(&b);
         system("clear");
         printf("Press '.' to close\r\n");
         printf("You pressed '%c'\r\n", c);
@@ -99,6 +103,13 @@ int main(int argc, char *argv[]) {
                 if (c == 's') {
                     pThis->NowPoint->y =
                         LimitYtoDrop(pThis->NowPoint, Points, NowPointNum);
+                    if (pThis->NowPoint->y < 0) {
+                        pThis->MainStep = GameOver;
+                        system("clear");
+                        printf("GameOver\r\n");
+                        printf("Press '.' to close\r\n");
+                        break;
+                    }
                     pThis->EvolvePointIndex = EvolvePointIndex(
                         b, pThis->NowPoint, Points, NowPointNum);
                     if (pThis->EvolvePointIndex != -1) {
@@ -107,6 +118,7 @@ int main(int argc, char *argv[]) {
                         pThis->MainStep = WaitNextPoint;
                     }
                 }
+                print_board(b, Points, NowPointNum);
                 break;
             case WaitNextPoint:
                 q = Points[NowPointNum];
@@ -117,19 +129,24 @@ int main(int argc, char *argv[]) {
                 pThis->NowPoint = q;
                 NowPointNum++;
                 pThis->MainStep = WaitDrop;
+                print_board(b, Points, NowPointNum);
                 break;
             case WaitEvolve:
                 pThis->NowPoint->Survive = FALSE;
                 Points[pThis->EvolvePointIndex]->v++;
                 pThis->MainStep = WaitNextPoint;
+                print_board(b, Points, NowPointNum);
+                break;
+            case GameOver:
+                system("clear");
+                printf("GameOver\r\n");
+                printf("Press '.' to close\r\n");
                 break;
         }
 
         // printf("Index : %d\r\n", pThis->EvolvePointIndex);
         // printf("step : %d\r\n", pThis->MainStep);
         // printf("PointNum : %d\r\n", NowPointNum);
-
-        print_board(b, Points, NowPointNum);
 
         if ((c = getchar()) == '.') {  // '.' を押すと抜ける
             break;
