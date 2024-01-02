@@ -83,6 +83,7 @@ int main(int argc, char *argv[]) {
         system("clear");
         printf("Press '.' to close\r\n");
         printf("You pressed '%c'\r\n", c);
+
         switch (pThis->MainStep) {
             case WaitDrop:
                 if (c == 'd' && (pThis->NowPoint->x < BOARD_SIZE - 1)) {
@@ -119,6 +120,10 @@ int main(int argc, char *argv[]) {
                 break;
         }
 
+        printf("Index : %d\r\n", pThis->EvolvePointIndex);
+        printf("step : %d\r\n", pThis->MainStep);
+        printf("PointNum : %d\r\n", NowPointNum);
+
         print_board(b, Points, NowPointNum);
 
         if ((c = getchar()) == '.') {  // '.' を押すと抜ける
@@ -134,10 +139,11 @@ int main(int argc, char *argv[]) {
 int EvolvePointIndex(Board b, Point *p, Point **Points, int PointNum) {
     int ret;
     int IsEvolveExist = FALSE;
+    Point *q;
     for (int i = 0; i < PointNum; i++) {
-        Point *q = Points[i];
-        if (!q->Survive) {
-            break;
+        q = Points[i];
+        if (!q->Survive || q->v != p->v) {
+            continue;
         }
         if (q->y == p->y && q->x == p->x - 1)  // 右側
         {
