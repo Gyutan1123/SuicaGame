@@ -142,29 +142,38 @@ int main(int argc, char *argv[]) {
 }
 
 int EvolvePointIndex(Board b, Point *p, Point **Points, int PointNum) {
-    int ret;
-    int IsEvolveExist = FALSE;
+    int retD = -1;
+    int retL = -1;
+    int retR = -1;
+
     Point *q;
     for (int i = 0; i < PointNum; i++) {
         q = Points[i];
         if (!q->Survive || q->v != p->v) {
             continue;
         }
-        if (q->y == p->y && q->x == p->x - 1)  // 右側
+
+        if (q->y == p->y + 1 && q->x == p->x)  // 下側
         {
-            return i;
+            retD = i;
         }
 
-        if (q->y == p->y && q->x == p->x + 1)  // 左側
+        if (q->y == p->y && q->x == p->x - 1)  // 左側
         {
-            IsEvolveExist = TRUE;
-            ret = i;
+            retL = i;
+        }
+
+        if (q->y == p->y && q->x == p->x + 1)  // 右側
+        {
+            retR = i;
         }
     }
-    if (IsEvolveExist) {
-        return ret;
+    if (retD != -1) {
+        return retD;
+    } else if (retL != -1) {
+        return retL;
     } else {
-        return -1;
+        return retR;
     }
 }
 
